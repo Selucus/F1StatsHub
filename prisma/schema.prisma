@@ -49,4 +49,94 @@ model User {
   image    String?
   accounts Account[]
   sessions Session[]
+
+  Comment     Comment[]
+  CommentVote CommentVote[]
+  Vote        Vote[]
+}
+
+model Raceweekend {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  charts    Chart[]
+
+  @@index([name])
+
+}
+
+
+
+
+model Chart {
+  id            String      @id @default(cuid())
+  title         String
+  imageUrl      String
+  chartType     String
+  createdAt     DateTime    @default(now())
+  tags          ChartTag[]
+  raceweekend   Raceweekend @relation(fields: [raceweekendId], references: [id])
+  raceweekendId String
+
+  comments Comment[]
+  votes     Vote[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  chart     Chart    @relation(fields: [chartId], references: [id])
+  chartId   String
+
+  replyToId String?
+  replyTo   Comment?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("ReplyTo")
+
+  votes     CommentVote[]
+  commentId String?
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+model Vote {
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String
+  chart   Chart    @relation(fields: [chartId], references: [id])
+  chartId String
+  type    VoteType
+
+  @@id([userId, chartId])
+}
+
+model CommentVote {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId String
+  type      VoteType
+
+  @@id([userId, commentId])
+}
+
+model ChartTag {
+  chart   Chart  @relation(fields: [chartId], references: [id])
+  chartId String
+
+  tag   Tag    @relation(fields: [tagId], references: [id])
+  tagId String
+
+  @@id([chartId, tagId])
+}
+
+model Tag {
+  id     String     @id @default(cuid())
+  name   String     @unique
+  charts ChartTag[]
 }
