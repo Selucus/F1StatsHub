@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth";
+import { getServerSession, NextAuthOptions } from "next-auth";
 import { db } from "./db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
@@ -20,9 +20,7 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     callbacks: {
-        async session({
-            token, session
-        }) {
+        async session({token, session}) {
             if(token){
                 session.user.id = token.id
                 session.user.name = token.name
@@ -71,3 +69,5 @@ export const authOptions: NextAuthOptions = {
     
 
 }
+
+export const getAuthSesion = () => getServerSession(authOptions)
