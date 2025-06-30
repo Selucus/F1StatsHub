@@ -1,3 +1,4 @@
+import PostFeed from '@/components/PostFeed'
 import { INFINITE_SCROLLING_RESULTS } from '@/config'
 import { getAuthSession } from '@/lib/auth'
 import { db } from '@/lib/db'
@@ -41,7 +42,7 @@ const page = async ({params}: PageProps) => {
 
     {/*<MiniCreatePost />*/}
 
-    <PostFeed />
+    <PostFeed initialPosts={raceweekend.charts} raceweekName={raceweekend.name}/>
 
 
     </>

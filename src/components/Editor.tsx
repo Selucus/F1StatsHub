@@ -32,6 +32,7 @@ const Editor: FC<EditorProps> = ({raceweekendId}) => {
     })
 
     const ref = useRef<EditorJS>()
+    const _titleRef = useRef<HTMLTextAreaElement>(null)
 
     const [isMounted, setIsMounted] = useState<boolean>(false)
 
@@ -182,10 +183,21 @@ const Editor: FC<EditorProps> = ({raceweekendId}) => {
         }
     }, [errors])
 
+if (!isMounted) {
+    return null
+  }
+
+  const { ref: titleRef, ...rest } = register('title')
+
   return <div className='w-full p-4 bg-zinc-50 rounded-lg border border-zinc-200'>
     <form id='raceweekend-post-form' className='w-fit' onSubmit={handleSubmit(onSubmit)}>
         <div className='prose prose-stone dark:prose-invert'>
-            <TextareaAutosize placeholder='Title' className='w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none'/>
+            <TextareaAutosize ref={(e) => {
+              titleRef(e)
+              // @ts-ignore
+              _titleRef.current = e
+            }}
+            {...rest} placeholder='Title' className='w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none'/>
 
 
             <div id='editor' className='min-h-[500px]' />
