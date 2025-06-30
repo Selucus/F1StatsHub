@@ -123,7 +123,7 @@ const Editor: FC<EditorProps> = ({raceweekendId}) => {
                 raceweekendId,
                 content,
             }
-            const { data } = await axios.post('/api/raceweekend/post/create')
+            const { data } = await axios.post('/api/raceweek/post/create', payload)
 
             return data
         },

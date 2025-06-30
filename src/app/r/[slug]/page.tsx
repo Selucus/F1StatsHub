@@ -41,6 +41,9 @@ const page = async ({params}: PageProps) => {
 
     {/*<MiniCreatePost />*/}
 
+    <PostFeed />
+
+
     </>
   )
 }
