@@ -78,6 +78,7 @@ model Chart {
   tags          ChartTag[]
   raceweekend   Raceweekend @relation(fields: [raceweekendId], references: [id])
   raceweekendId String
+  content Json?
 
   comments Comment[]
   votes     Vote[]

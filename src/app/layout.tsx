@@ -3,6 +3,7 @@ import {Inter} from "next/font/google"
 import { cn } from '@/lib/utils'
 import Navbar from "@/components/Navbar"
 import { Toaster } from '@/components/ui/Toaster'
+import Providers from '@/components/Providers'
 
 export const metadata = {
   title: 'Breadit',
@@ -24,6 +25,7 @@ export default function RootLayout({
       inter.className
       )}>
       <body className='min-h-screen pt-12 bg-slate-50 antialiased'>
+        <Providers>
         {/* @ts-expect-error typescript cant handle server component type wise */}
         <Navbar />
 
@@ -35,7 +37,7 @@ export default function RootLayout({
 
         <Toaster />
          
-         
+         </Providers>
         </body>
     </html>
   )
