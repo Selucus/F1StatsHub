@@ -66,11 +66,11 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, raceweekName}) => {
         if(index === posts.length - 1){
             return (
                 <li key={post.id} ref={ref}>
-                    <Post commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
+                    <Post currentVote={currentVote} votesAmt={votesAmount}  commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
                 </li>
             )
         } else{
-            return <Post commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
+            return <Post currentVote={currentVote} votesAmt={votesAmount}  commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
         }
     })}
   </ul>

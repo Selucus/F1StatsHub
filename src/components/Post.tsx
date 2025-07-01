@@ -2,6 +2,9 @@ import { Vote, Chart } from '@prisma/client'
 import { Link, MessageSquare } from 'lucide-react'
 import { FC } from 'react'
 import EditorOutput from './EditorOutput'
+import PostVoteClient from './post-vote/PostVoteClient'
+
+type PartialVote = Pick<Vote, 'type'>
 
 interface PostProps {
   raceweekendName: string
@@ -9,13 +12,15 @@ interface PostProps {
     votes: Vote[]
   }
   commentNumber: number
+  votesAmt: number
+  currentVote?: PartialVote
 }
 
-const Post: FC<PostProps> = ({raceweekendName, post, commentNumber}) => {
+const Post: FC<PostProps> = ({raceweekendName, post, commentNumber, votesAmt: _votesAmt, currentVote}) => {
   return <div className='rounded-md bg-white shadow'>
     <div className='px-6 py-4 flex justify-between'>
         {/* to do votes */}
-
+        <PostVoteClient initialVotesAmt={_votesAmt} postId={post.id} initialVote={currentVote?.type} />
         <div className='w-0 flex-1'>
             <div className='max-h-40 mt-1 text-xs text-gray-500'>
                 {raceweekendName ? (
