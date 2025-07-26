@@ -1,52 +1,56 @@
-import PostFeed from '@/components/PostFeed'
-import { INFINITE_SCROLLING_RESULTS } from '@/config'
-import { getAuthSession } from '@/lib/auth'
-import { db } from '@/lib/db'
-import { notFound } from 'next/navigation'
-
+import PostFeed from "@/components/PostFeed";
+import { INFINITE_SCROLLING_RESULTS } from "@/config";
+import { getAuthSession } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
 
 interface PageProps {
   params: {
-    slug: string
-  }
+    slug: string;
+  };
 }
 
-const page = async ({params}: PageProps) => {
-    const { slug } = params
+const page = async ({ params }: PageProps) => {
+  const { slug } = params;
 
-    const session = await getAuthSession()
+  const session = await getAuthSession();
 
-    const raceweekend = await db.raceweekend.findFirst({
-        where: {name: slug},
+  const raceweekend = await db.raceweekend.findFirst({
+    where: { name: slug },
+    include: {
+      charts: {
         include: {
-            charts: {
-                include: {
-                    votes: true,
-                    comments: true,
-                    raceweekend: true,
-                }
-            }
+          votes: true,
+          comments: true,
+          raceweekend: true,
         },
+      },
+    },
+    orderBy: {
+      createdAt: "desc", // needs changed in both places when updated
+    },
 
-        take: INFINITE_SCROLLING_RESULTS
-    })
+    take: INFINITE_SCROLLING_RESULTS,
+  });
 
-
-    if(!raceweekend){
-        return notFound()
-    }
+  if (!raceweekend) {
+    return notFound();
+  }
 
   return (
     <>
-    <h1 className='font-bold text-3xl md:text-4xl h-14'>{raceweekend.name}</h1>
+      <h1 className="font-bold text-3xl md:text-4xl h-14">
+        {raceweekend.name}
+      </h1>
 
-    {/*<MiniCreatePost />*/}
+      {/*<MiniCreatePost />*/}
 
-    <PostFeed initialPosts={raceweekend.charts} raceweekName={raceweekend.name}/>
-
-
+      <PostFeed
+        initialPosts={raceweekend.charts}
+        raceweekName={raceweekend.name}
+      />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;

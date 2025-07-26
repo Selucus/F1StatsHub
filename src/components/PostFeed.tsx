@@ -1,79 +1,96 @@
-"use client"
+"use client";
 
-import { FC, useRef } from 'react'
-import { ExtendedPost } from '@/types/db'
-import {useIntersection} from "@mantine/hooks"
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { INFINITE_SCROLLING_RESULTS } from '@/config'
-import axios from 'axios'
-import { useSession } from 'next-auth/react'
-import { Vote } from '@prisma/client'
-import Post from './Post'
-
+import { FC, useEffect, useRef } from "react";
+import { ExtendedPost } from "@/types/db";
+import { useIntersection } from "@mantine/hooks";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { INFINITE_SCROLLING_RESULTS } from "@/config";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { Vote } from "@prisma/client";
+import Post from "./Post";
 
 interface PostFeedProps {
-  initialPosts: ExtendedPost[]
-  raceweekName?: string
+  initialPosts: ExtendedPost[];
+  raceweekName?: string;
 }
 
+const PostFeed: FC<PostFeedProps> = ({ initialPosts, raceweekName }) => {
+  const { data: session } = useSession();
+  const lastPostRef = useRef<HTMLElement>(null);
+  const { ref, entry } = useIntersection({
+    root: lastPostRef.current,
+    threshold: 1,
+  });
 
+  const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery(
+    ["infinite-query"],
+    async ({ pageParam = 1 }) => {
+      const query =
+        `/api/posts?limit=${INFINITE_SCROLLING_RESULTS}&page=${pageParam}` +
+        (!!raceweekName ? `&raceweekendName=${raceweekName}` : "");
 
+      const { data } = await axios.get(query);
+      return data as ExtendedPost[];
+    },
+    {
+      getNextPageParam: (_, pages) => {
+        return pages.length + 1;
+      },
+      initialData: {
+        pages: [initialPosts],
+        pageParams: [1],
+      },
+    }
+  );
 
-const PostFeed: FC<PostFeedProps> = ({ initialPosts, raceweekName}) => {
+  useEffect(() => {
+    if (entry?.isIntersecting) {
+      fetchNextPage();
+    }
+  }, [entry, fetchNextPage]);
 
-    const {data: session} = useSession()
-    const lastPostRef = useRef<HTMLElement>(null)
-    const {ref, entry} = useIntersection({
-        root: lastPostRef.current,
-        threshold: 1
-    })
+  const posts = data?.pages.flatMap((page) => page) ?? initialPosts;
 
-    const { data, fetchNextPage, isFetchingNextPage} = useInfiniteQuery(
-        ['infinite-query'],
-        async ({pageParam=1}) => {
-            const query = `/api/posts?limit=${INFINITE_SCROLLING_RESULTS}&page=${pageParam}` + 
-            (!!raceweekName ? `&raceweekendName=${raceweekName}` : '')
-
-            const { data } = await axios.get(query)
-            return data as ExtendedPost[]
-        }, {
-            getNextPageParam: (_, pages) => {
-                return pages.length + 1
-            },
-            initialData: {
-                pages: [initialPosts],
-                pageParams: [1],
-            }
-        }
-    )
-
-    const posts = data?.pages.flatMap((page) => page) ?? initialPosts
-
-  return <ul className='flex flex-col col-span-2 space-y-6'>
-    {posts.map((post, index) => {
+  return (
+    <ul className="flex flex-col col-span-2 space-y-6">
+      {posts.map((post, index) => {
         const votesAmount = post.votes.reduce((acc: number, vote: Vote) => {
-            if(vote.type === 'UP') return acc + 1
-            if(vote.type === 'DOWN') return acc - 1
-            return acc
-        }, 0)
+          if (vote.type === "UP") return acc + 1;
+          if (vote.type === "DOWN") return acc - 1;
+          return acc;
+        }, 0);
 
         const currentVote = post.votes.find(
-            (vote: Vote) => vote.userId === session?.user.id
-        )
+          (vote: Vote) => vote.userId === session?.user.id
+        );
 
-    
-
-        if(index === posts.length - 1){
-            return (
-                <li key={post.id} ref={ref}>
-                    <Post currentVote={currentVote} votesAmt={votesAmount}  commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
-                </li>
-            )
-        } else{
-            return <Post currentVote={currentVote} votesAmt={votesAmount}  commentNumber={post.comments.length} post={post} raceweekendName={post.raceweekend.name}/>
+        if (index === posts.length - 1) {
+          return (
+            <li key={post.id} ref={ref}>
+              <Post
+                currentVote={currentVote}
+                votesAmt={votesAmount}
+                commentNumber={post.comments.length}
+                post={post}
+                raceweekendName={post.raceweekend.name}
+              />
+            </li>
+          );
+        } else {
+          return (
+            <Post
+              currentVote={currentVote}
+              votesAmt={votesAmount}
+              commentNumber={post.comments.length}
+              post={post}
+              raceweekendName={post.raceweekend.name}
+            />
+          );
         }
-    })}
-  </ul>
-}
+      })}
+    </ul>
+  );
+};
 
-export default PostFeed
+export default PostFeed;
